@@ -1,0 +1,29 @@
+# Read the documentation: https://github.com/FriendsOfSymfony/FOSElasticaBundle/blob/master/Resources/doc/setup.md
+fos_elastica:
+  clients:
+    default: { url: '%env(ELASTICSEARCH_URL)%' }
+  indexes:
+    mysql: # the name of our index
+      settings:
+        index:
+          max_result_window: 100000000
+          analysis:
+            analyzer:
+              keyword_analyzer: # this is a custom analyzer, see the explanations below
+                type: custom
+                tokenizer: standard
+                filter: [standard, lowercase, asciifolding, trim]
+
+      types:
+        company: # the name of our type
+          properties:
+            name: ~
+            price: ~
+            number: ~
+          persistence:
+            driver: orm
+            model: App\Entity\Company
+            provider: ~
+            finder: ~
+            repository: App\SearchRepository\CompanyRepository
+

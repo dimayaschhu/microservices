@@ -1,0 +1,41 @@
+## Read the documentation: https://github.com/FriendsOfSymfony/FOSElasticaBundle/blob/master/Resources/doc/setup.md
+#fos_elastica:
+#  clients:
+#    default: { url: '%env(ELASTICSEARCH_URL)%' }
+#  indexes:
+#    marvel: # the name of our index
+#      settings:
+#        index:
+#          analysis:
+#            analyzer:
+#              keyword_analyzer: # this is a custom analyzer, see the explanations below
+#                type: custom
+#                tokenizer: standard
+#                filter: [standard, lowercase, asciifolding, trim]
+#      types:
+#        superhero: # the name of our type
+#          properties:
+#            name:
+#              analyzer: keyword_analyzer
+#              search_analyzer: keyword_analyzer
+#              type: text
+#          persistence:
+#            driver: orm
+#            model: App\Entity\SuperHero
+#            provider: ~
+#            finder: ~
+#            repository: App\SearchRepository\SuperHeroRepository
+#
+#        company: # the name of our type
+#          properties:
+#            name:
+#              analyzer: keyword_analyzer
+#              search_analyzer: keyword_analyzer
+#              type: text
+#          persistence:
+#            driver: orm
+#            model: App\Entity\Company
+#            provider: ~
+#            finder: ~
+#            repository: App\SearchRepository\CompanyRepository
+#

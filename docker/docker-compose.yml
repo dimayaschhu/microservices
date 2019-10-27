@@ -6,9 +6,9 @@
   - ALLOW_ARBITRARY=1
   - URL=phpmyadmin.blog
   restart: always
-  links: ['mysql_base','mysql_auth','mysql_finance']
+  links: ['mysql_elastic','mysql_base','mysql_auth','mysql_finance']
   ports: ['30000:80']
-
+#  links: ['mysql_base','mysql_auth','mysql_finance','mysql_elastic']
 
 ##########################################
 # Service `base`
@@ -16,8 +16,12 @@
 'php_base':
   build: ./php
   container_name: 'php_base'
-  links: ['nginx_finance','nginx_auth','mysql_base']
-  volumes: [ '../base:/var/www/html:cached' ]
+  links: ['nginx_finance','nginx_auth','mysql_base','nginx_elastic']
+  volumes: [
+    '../base:/var/www/html:cached',
+    './php-ini:/usr/local/etc/php/custom.d:cached',
+    './php-ini:/usr/local/etc/php:cached'
+  ]
 
 'nginx_base':
   build: ./web
@@ -37,6 +41,69 @@
   - MYSQL_USER=root
   - MYSQL_ROOT_PASSWORD=root
   volumes: [/var/lib/mysql]
+
+##########################################
+# Service `elastic`
+##########################################
+'php_elastic':
+  build: ./php
+  container_name: 'php_elastic'
+  links: ['mysql_elastic','elasticsearch_one']
+  volumes: [
+    '../elastic:/var/www/html:cached',
+    './php-ini:/usr/local/etc/php/custom.d:cached',
+    './php-ini:/usr/local/etc/php:cached'
+  ]
+
+'nginx_elastic':
+  build: ./web
+  container_name: 'nginx_elastic'
+  links: ['php_elastic']
+  volumes: [
+    '../elastic:/var/www/html:cached',
+    '../elastic/nginx.conf:/etc/nginx/conf.d/default.conf:cached'
+  ]
+  ports: ['8333:80']
+
+'mysql_elastic':
+  image: 'mysql:5.6.26'
+  container_name: 'mysql_elastic'
+  environment:
+  - MYSQL_USER=root
+  - MYSQL_ROOT_PASSWORD=root
+  volumes: [/var/lib/mysql]
+
+'elasticsearch_one':
+  image: docker.elastic.co/elasticsearch/elasticsearch:6.0.1
+  container_name: 'elasticsearch_one'
+  environment:
+  - cluster.name=docker-cluster
+  - bootstrap.memory_lock=true
+  - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  ulimits:
+    memlock:
+      soft: -1
+      hard: -1
+  volumes:
+  - esdata1:/usr/share/elasticsearch/data
+  ports:
+  - 9200:9200
+
+'elasticsearch_two':
+  image: docker.elastic.co/elasticsearch/elasticsearch:6.0.1
+  container_name: 'elasticsearch_two'
+  environment:
+  - cluster.name=docker-cluster
+  - bootstrap.memory_lock=true
+  - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  - "discovery.zen.ping.unicast.hosts=elasticsearch"
+  ulimits:
+    memlock:
+      soft: -1
+      hard: -1
+  volumes:
+  - esdata2:/usr/share/elasticsearch/data
+
 ##########################################
 # Service `auth`
 ##########################################
@@ -44,7 +111,11 @@
   build: ./php
   container_name: 'php_auth'
   links: ['mysql_auth']
-  volumes: [ '../auth:/var/www/html:cached' ]
+  volumes: [
+    '../auth:/var/www/html:cached',
+    './php-ini:/usr/local/etc/php/custom.d:cached',
+    './php-ini:/usr/local/etc/php:cached'
+  ]
 
 'nginx_auth':
   build: ./web
@@ -74,6 +145,8 @@
   links: ['mysql_finance']
   volumes: [
     '../finance:/var/www/html:cached',
+    './php-ini:/usr/local/etc/php/custom.d:cached',
+    './php-ini:/usr/local/etc/php:cached'
   ]
 
 'nginx_finance':
