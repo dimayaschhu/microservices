@@ -6,7 +6,7 @@
   - ALLOW_ARBITRARY=1
   - URL=phpmyadmin.blog
   restart: always
-  links: ['mysql_elastic','mysql_base','mysql_auth','mysql_finance']
+  links: ['mysql_elastic','mysql_base','mysql_auth','mysql_finance','rabbit']
   ports: ['30000:80']
 #  links: ['mysql_base','mysql_auth','mysql_finance','mysql_elastic']
 
@@ -16,7 +16,7 @@
 'php_base':
   build: ./php
   container_name: 'php_base'
-  links: ['nginx_finance','nginx_auth','mysql_base','nginx_elastic']
+  links: ['nginx_finance','nginx_auth','mysql_base','nginx_elastic','nginx_rabbit']
   volumes: [
     '../base:/var/www/html:cached',
     './php-ini:/usr/local/etc/php/custom.d:cached',
@@ -163,6 +163,44 @@
 'mysql_finance':
   image: 'mysql:5.6.26'
   container_name: 'mysql_finance'
+  environment:
+  - MYSQL_USER=root
+  - MYSQL_ROOT_PASSWORD=root
+  volumes: [/var/lib/mysql]
+##########################################
+# Service `rabbit`
+##########################################
+'php_rabbit':
+  build: ./php
+  container_name: 'php_rabbit'
+  links: ['rabbit','mysql_rabbit']
+  volumes: [
+    '../rabbit:/var/www/html:cached',
+    './php-ini:/usr/local/etc/php/custom.d:cached',
+    './php-ini:/usr/local/etc/php:cached'
+  ]
+
+'nginx_rabbit':
+  build: ./web
+  container_name: 'nginx_rabbit'
+  links: ['php_rabbit']
+  volumes: [
+    '../rabbit:/var/www/html:cached',
+    '../rabbit/nginx.conf:/etc/nginx/conf.d/default.conf:cached'
+  ]
+  ports: ['8344:80']
+
+
+'rabbit':
+  container_name: 'rabbit'
+  image: rabbitmq:3
+  ports:
+  - 5672:5672
+  - 15672:15672
+
+'mysql_rabbit':
+  image: 'mysql:5.6.26'
+  container_name: 'mysql_rabbit'
   environment:
   - MYSQL_USER=root
   - MYSQL_ROOT_PASSWORD=root
