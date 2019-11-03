@@ -10,6 +10,7 @@ use App\Refs\Repository\Interfaces\VacancyRepoInterface;
 use App\Refs\Services\RefsService;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\ORM\ORMException;
 
 /**
  * @method Company|null find($id, $lockMode = NULL, $lockVersion = NULL)
@@ -20,6 +21,7 @@ use Doctrine\Common\Persistence\ManagerRegistry;
 class CompanyRepository extends ServiceEntityRepository implements CompanyRepoInterface
 {
     public $registry;
+    use BaseRefsRepository;
 
     public function __construct(ManagerRegistry $registry)
     {
@@ -27,21 +29,6 @@ class CompanyRepository extends ServiceEntityRepository implements CompanyRepoIn
         parent::__construct($registry, Company::class);
     }
 
-
-    public function previewAll(): array
-    {
-        $companies = [];
-
-        foreach (parent::findAll() as $company) {
-            $companies[] = $this->transformationForPreview($company);
-        }
-        return $companies;
-    }
-
-    public function search($data): array
-    {
-        // TODO: Implement search() method.
-    }
 
     public function getWithPosition(Position $position, array $salary, bool $hot = FALSE, bool $active = TRUE): array
     {
@@ -51,18 +38,16 @@ class CompanyRepository extends ServiceEntityRepository implements CompanyRepoIn
     private function transformationForPreview($company)
     {
         $vacancyRepository = new VacancyRepository($this->registry);
-
-        $positions = '';
         foreach ($company->getVacancies() as $key => $vacancy) {
-            $position = $vacancy->getPosition()->getName();
-            $positions .= (strpos($positions, $position) === FALSE) ? $position . ', ':'';
+            $positions[] = $vacancy->getPosition()->getName();
         }
+        $positions = array_unique($positions ?? []);
         return [
             'id'                      => $company->getId(),
             'name'                    => $company->getName(),
             'quantity_open_vacancies' => $vacancyRepository->countOpenVacancies($company),
             'quantity_hot_vacancies'  => $vacancyRepository->countHotVacancies($company),
-            'all_positions'           => $positions,
+            'all_positions'           => implode(",", $positions),
         ];
     }
 }

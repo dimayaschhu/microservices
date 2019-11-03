@@ -2,6 +2,7 @@
 
 namespace App\Refs\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -25,6 +26,11 @@ class Position
      * @ORM\Column(type="text", nullable=true)
      */
     private $descriprion;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Refs\Entity\Vacancy", mappedBy="position", orphanRemoval=true)
+     */
+    private $vacancies;
 
     public function getId(): ?int
     {
@@ -53,5 +59,13 @@ class Position
         $this->descriprion = $descriprion;
 
         return $this;
+    }
+
+    /**
+     * @return Collection|Vacancy[]
+     */
+    public function getVacancies(): Collection
+    {
+        return $this->vacancies;
     }
 }

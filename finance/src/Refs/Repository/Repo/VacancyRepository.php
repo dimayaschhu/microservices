@@ -17,19 +17,10 @@ use Doctrine\Common\Persistence\ManagerRegistry;
  */
 class VacancyRepository extends ServiceEntityRepository implements VacancyRepoInterface
 {
+    use BaseRefsRepository;
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Vacancy::class);
-    }
-
-    public function previewAll(): array
-    {
-        $vacanies = parent::findAll();
-    }
-
-    public function search($data): array
-    {
-        return parent::findBy($data);
     }
 
     public function getWithPosition(Position $position, array $salary, bool $hot = FALSE, bool $active = TRUE): array
@@ -37,22 +28,38 @@ class VacancyRepository extends ServiceEntityRepository implements VacancyRepoIn
         // TODO: Implement getWithPosition() method.
     }
 
-    public function countOpenVacancies(Company $company = NULL)
+    public function countOpenVacancies(Company $company = NULL, Position $position = NULL): int
     {
-        if($company){
-            return $this->count(['company'=>$company,'active'=>TRUE]);
-        }else{
-            return $this->count(['active'=>TRUE]);
+        if ($company) {
+            return $this->count(['company' => $company, 'active' => TRUE]);
         }
-
+        if ($position) {
+            return $this->count(['position' => $position, 'active' => TRUE]);
+        }
     }
 
-    public function countHotVacancies(Company $company = NULL)
+    public function countHotVacancies(Company $company = NULL, Position $position = NULL): int
     {
-        if($company){
-            return $this->count(['company'=>$company,'active'=>TRUE,'hot'=>TRUE]);
-        }else{
-            return $this->count(['active'=>TRUE,'hot'=>TRUE]);
+        if ($company) {
+            return $this->count(['company' => $company, 'active' => TRUE, 'hot' => TRUE]);
         }
+
+        if ($position) {
+            return $this->count(['position' => $position, 'active' => TRUE, 'hot' => TRUE]);
+        }
+
+        return 0;
+    }
+
+    private function transformationForPreview($vacancy)
+    {
+        return [
+            'id'       => $vacancy->getId(),
+            'company'  => $vacancy->getCompany()->getName(),
+            'position' => $vacancy->getPosition()->getName(),
+            'salary'   => $vacancy->getSalary(),
+            'hot'      => $vacancy->getHot(),
+            'active'   => $vacancy->getActive(),
+        ];
     }
 }

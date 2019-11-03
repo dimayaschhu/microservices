@@ -13,6 +13,6 @@ interface BaseRefsInterface
 {
     public function previewAll():array;
 
-    public function search($data):array;
+    public function search(array $data):array;
 
 }
