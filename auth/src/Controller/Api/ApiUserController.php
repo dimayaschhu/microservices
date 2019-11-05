@@ -21,7 +21,7 @@ class ApiUserController extends AbstractController
      */
     public function detail(UserServiceInterface $userService)
     {
-        return $this->json($userService->getUser());
+        return $this->json($userService->preview());
     }
 
     /**
@@ -35,8 +35,7 @@ class ApiUserController extends AbstractController
         Request $request,
         UserServiceInterface $userService,
         UpdateUserRequestValidator $requestValidator
-    )
-    {
+    ) {
         $data = json_decode($request->getContent(), TRUE);
         $errors = $requestValidator->validation($data);
         if (!empty($errors)) {

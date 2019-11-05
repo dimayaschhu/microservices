@@ -75,13 +75,23 @@ class UserService implements UserServiceInterface
             ->setRoles(['ROLE_USER'])
             ->setSuperAdmin(FALSE);
 
-        $this->userManager->updateUser($user, TRUE);
-        $token = $this->JWTManager->create($user);
-        return ['token' => $token];
         try {
-
+            $this->userManager->updateUser($user, TRUE);
+            $token = $this->JWTManager->create($user);
+            return ['token' => $token];
         } catch (\Exception $e) {
             throw new \Exception();
         }
+    }
+
+    public function preview()
+    {
+        $user = $this->getUser();
+        return [
+            'id'       => $user->getId(),
+            'username' => $user->getUsername(),
+            'email'       => $user->getEmail(),
+            'roles'       => $user->getRoles(),
+        ];
     }
 }

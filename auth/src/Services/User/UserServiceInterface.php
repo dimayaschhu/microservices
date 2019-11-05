@@ -15,6 +15,8 @@ interface UserServiceInterface
 {
     public function getUser();
 
+    public function preview();
+
     public function update(array $data);
 
     public function create(array $data);

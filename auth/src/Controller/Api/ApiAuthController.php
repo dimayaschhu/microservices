@@ -4,10 +4,12 @@ namespace App\Controller\Api;
 
 use App\Controller\Requests\RegisterRequestValidator;
 use App\Services\User\UserServiceInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 /**
  * @Route("/auth")
@@ -37,5 +39,19 @@ class ApiAuthController extends AbstractController
             return new JsonResponse(["error" => $e->getMessage()], 500);
         }
 
+    }
+
+    /**
+     * @Route("/refresh", name="api_refresh",methods={"POST"})
+     * @param TokenStorageInterface $tokenStorage
+     * @param JWTTokenManagerInterface $JWTManager
+     * @return JsonResponse
+     */
+    public function refresh(
+        TokenStorageInterface $tokenStorage,
+        JWTTokenManagerInterface $JWTManager
+    ) {
+        $user = $tokenStorage->getToken()->getUser();
+        return $this->json(['token' => $JWTManager->create($user)]);
     }
 }
