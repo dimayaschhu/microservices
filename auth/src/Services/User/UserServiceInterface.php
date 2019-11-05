@@ -9,10 +9,12 @@
 namespace App\Services\User;
 
 
-use App\Entity\User;
-
 interface UserServiceInterface
 {
+    public function refreshToken();
+
+    public function getUserToken(array $credential);
+
     public function getUser();
 
     public function preview();

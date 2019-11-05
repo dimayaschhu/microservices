@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api;
 
+use App\Controller\Requests\LoginRequestValidator;
 use App\Controller\Requests\RegisterRequestValidator;
 use App\Services\User\UserServiceInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
@@ -43,15 +44,38 @@ class ApiAuthController extends AbstractController
 
     /**
      * @Route("/refresh", name="api_refresh",methods={"POST"})
-     * @param TokenStorageInterface $tokenStorage
-     * @param JWTTokenManagerInterface $JWTManager
+     * @param UserServiceInterface $userService
      * @return JsonResponse
      */
     public function refresh(
-        TokenStorageInterface $tokenStorage,
-        JWTTokenManagerInterface $JWTManager
+        UserServiceInterface $userService
     ) {
-        $user = $tokenStorage->getToken()->getUser();
-        return $this->json(['token' => $JWTManager->create($user)]);
+        return $this->json(['token' => $userService->refreshToken()]);
+    }
+
+    /**
+     * @Route("/login", name="api_login",methods={"POST"})
+     * @param LoginRequestValidator $requestValidator
+     * @param Request $request
+     * @param UserServiceInterface $userService
+     * @return JsonResponse
+     */
+    public function login(
+        LoginRequestValidator $requestValidator,
+        Request $request,
+        UserServiceInterface $userService
+    ) {
+        $data = json_decode($request->getContent(), TRUE);
+        $errors = $requestValidator->validation($data);
+        if (!empty($errors)) {
+            return $this->json($errors, 422);
+        }
+
+        try{
+            return $this->json(['token' =>$userService->getUserToken($data)]);
+        }catch (\Exception $exception){
+            return $this->json(['error'=>'невірний логін або пароль'],422);
+        }
+
     }
 }
