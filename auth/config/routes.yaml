@@ -1,25 +1,9 @@
-#index:
-#    path: /
-#    controller: App\Controller\DefaultController::index
-register:
-  path: /register
-  controller: App\Controller\AuthController::register
-  methods: POST
-
-login_check:
-  path:     /login_check
-  methods:  POST
-
-login:
-  path: /login
-  controller: App\Controller\AuthController::login
-
-getUser:
-  path: api/user
-  controller: App\Controller\AuthController::receiveUser
-  methods:  GET
-
-updateUser:
-  path: api/user
-  controller: App\Controller\AuthController::updateUser
-  methods:  POST
+api_auth_login:
+    path: /api/auth/login
+    methods:  [POST]
+controllers:
+    prefix: /
+    resource: '../src/Controller'
+api:
+    prefix: /api
+    resource: '../src/Controller/Api'
