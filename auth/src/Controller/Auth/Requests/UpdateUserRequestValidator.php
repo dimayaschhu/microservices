@@ -6,7 +6,7 @@
  * Time: 7:33 AM
  */
 
-namespace App\Controller\Requests;
+namespace App\Controller\Auth\Requests;
 
 
 use FOS\UserBundle\Model\UserManagerInterface;

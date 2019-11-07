@@ -13,22 +13,25 @@ use App\Entity\User;
 use FOS\UserBundle\Model\UserManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserService implements UserServiceInterface
 {
     public $userManager;
     public $tokenStorage;
     public $JWTManager;
-
+    public $encoder;
 
     public function __construct(
         UserManagerInterface $userManager,
         TokenStorageInterface $tokenStorage,
-        JWTTokenManagerInterface $JWTManager
+        JWTTokenManagerInterface $JWTManager,
+        UserPasswordEncoderInterface $encoder
     ) {
         $this->userManager = $userManager;
         $this->tokenStorage = $tokenStorage;
         $this->JWTManager = $JWTManager;
+        $this->encoder = $encoder;
 
     }
 
@@ -78,10 +81,31 @@ class UserService implements UserServiceInterface
         $this->userManager->updateUser($user, TRUE);
         $token = $this->JWTManager->create($user);
         return ['token' => $token];
-        try {
+    }
 
-        } catch (\Exception $e) {
+    public function preview()
+    {
+        $user = $this->getUser();
+        return [
+            'id'       => $user->getId(),
+            'username' => $user->getUsername(),
+            'email'    => $user->getEmail(),
+            'roles'    => $user->getRoles(),
+        ];
+    }
+
+    public function refreshToken()
+    {
+        $user = $this->tokenStorage->getToken()->getUser();
+        return $this->JWTManager->create($user);
+    }
+
+    public function getUserToken(array $credential)
+    {
+        $user = $this->userManager->findUserByUsername($credential['username']);
+        if (!$this->encoder->isPasswordValid($user, $credential['password'])) {
             throw new \Exception();
         }
+        return $this->JWTManager->create($user);
     }
 }

@@ -1,17 +1,15 @@
 <?php
 
-namespace App\Controller\Api;
+namespace App\Controller\User;
 
-use App\Controller\Requests\UpdateUserRequestValidator;
+
+use App\Controller\Auth\Requests\UpdateUserRequestValidator;
 use App\Services\User\UserServiceInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Route("/user")
- */
 class ApiUserController extends AbstractController
 {
     /**
@@ -21,24 +19,21 @@ class ApiUserController extends AbstractController
      */
     public function detail(UserServiceInterface $userService)
     {
-        return $this->json($userService->getUser());
+        return $this->json($userService->preview());
     }
 
     /**
      * @Route("/update", name="api_user_update", methods={"POST"})
      * @param Request $request
      * @param UserServiceInterface $userService
-     * @param UpdateUserRequestValidator $requestValidator
+     * @param UpdateUserRequestValidator $validator
      * @return JsonResponse
      */
-    public function update(
-        Request $request,
-        UserServiceInterface $userService,
-        UpdateUserRequestValidator $requestValidator
-    )
-    {
+    public function update(Request $request,
+        UserServiceInterface $userService, UpdateUserRequestValidator $validator
+    ) {
         $data = json_decode($request->getContent(), TRUE);
-        $errors = $requestValidator->validation($data);
+        $errors = $validator->validation($data);
         if (!empty($errors)) {
             return $this->json($errors, 422);
         }

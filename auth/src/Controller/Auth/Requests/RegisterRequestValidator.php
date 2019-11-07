@@ -6,12 +6,13 @@
  * Time: 8:41 PM
  */
 
-namespace App\Controller\Requests;
+namespace App\Controller\Auth\Requests;
 
 
 use FOS\UserBundle\Model\UserManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Exception\ValidatorException;
 use Symfony\Component\Validator\Validation;
 
 class RegisterRequestValidator
@@ -24,7 +25,7 @@ class RegisterRequestValidator
         $this->repository = $userManager;
     }
 
-    public function validation(array $data)
+    public function validation(array $data = [])
     {
         $errors = [];
         $validator = Validation::createValidator();
@@ -56,7 +57,8 @@ class RegisterRequestValidator
                 'message' => 'дане email зайнятв',
             ];
         }
-
-        return $errors;
+        if(!empty($errors)){
+            throw new ValidatorException(json_encode($errors));
+        }
     }
 }

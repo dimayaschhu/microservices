@@ -25,7 +25,7 @@ class Position
     /**
      * @ORM\Column(type="text", nullable=true)
      */
-    private $descriprion;
+    private $description;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Refs\Entity\Vacancy", mappedBy="position", orphanRemoval=true)
@@ -49,14 +49,14 @@ class Position
         return $this;
     }
 
-    public function getDescriprion(): ?string
+    public function getDescription(): ?string
     {
-        return $this->descriprion;
+        return $this->description;
     }
 
-    public function setDescriprion(?string $descriprion): self
+    public function setDescription(?string $description): self
     {
-        $this->descriprion = $descriprion;
+        $this->description = $description;
 
         return $this;
     }

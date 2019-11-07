@@ -6,41 +6,9 @@
   - ALLOW_ARBITRARY=1
   - URL=phpmyadmin.blog
   restart: always
-  links: ['mysql_elastic','mysql_base','mysql_auth','mysql_finance','rabbit']
+  links: ['mysql_elastic','mysql_auth','mysql_finance','rabbit']
   ports: ['30000:80']
-#  links: ['mysql_base','mysql_auth','mysql_finance','mysql_elastic']
 
-##########################################
-# Service `base`
-##########################################
-'php_base':
-  build: ./php
-  container_name: 'php_base'
-  links: ['nginx_finance','nginx_auth','mysql_base','nginx_elastic','nginx_rabbit']
-  volumes: [
-    '../base:/var/www/html:cached',
-    './php-ini:/usr/local/etc/php/custom.d:cached',
-    './php-ini:/usr/local/etc/php:cached'
-  ]
-
-'nginx_base':
-  build: ./web
-  container_name: 'nginx_base'
-  links: ['php_base']
-  volumes: [
-    '../base:/var/www/html:cached',
-    '../base/nginx.conf:/etc/nginx/conf.d/default.conf:cached'
-  ]
-
-  ports: ['8011:80']
-
-'mysql_base':
-  image: 'mysql:5.6.26'
-  container_name: 'mysql_base'
-  environment:
-  - MYSQL_USER=root
-  - MYSQL_ROOT_PASSWORD=root
-  volumes: [/var/lib/mysql]
 
 ##########################################
 # Service `elastic`
@@ -105,12 +73,12 @@
   - esdata2:/usr/share/elasticsearch/data
 
 ##########################################
-# Service `auth`
+# Service `base`
 ##########################################
 'php_auth':
   build: ./php
   container_name: 'php_auth'
-  links: ['mysql_auth']
+  links: ['nginx_finance','mysql_auth','nginx_elastic','nginx_rabbit']
   volumes: [
     '../auth:/var/www/html:cached',
     './php-ini:/usr/local/etc/php/custom.d:cached',
@@ -126,7 +94,7 @@
     '../auth/nginx.conf:/etc/nginx/conf.d/default.conf:cached'
   ]
 
-  ports: ['8311:80']
+  ports: ['8011:80']
 
 'mysql_auth':
   image: 'mysql:5.6.26'

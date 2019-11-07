@@ -45,10 +45,6 @@ class Vacancy
      */
     private $hot;
 
-    public function __construct()
-    {
-        $this->vacancies = new ArrayCollection();
-    }
 
     public function getId(): ?int
     {
@@ -72,7 +68,7 @@ class Vacancy
         return $this->position;
     }
 
-    public function setPosition(?self $position): self
+    public function setPosition(?Position $position): self
     {
         $this->position = $position;
 
